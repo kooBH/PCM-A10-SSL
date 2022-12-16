@@ -1,0 +1,46 @@
+model:
+  m1:
+    param1 : 1
+---
+train:
+  epoch: 50
+  batch_size: 12
+  num_workers: 16
+  optimizer: 'adam'
+  adam: 0.0001
+  adabound:
+    initial: 0.001
+    final: 0.05
+  frame_num: 128
+  summary_interval: 10
+  validation_interval: 100
+  checkpoint_interval: 1000
+---
+loss:
+  type: 'MSE'
+---
+scheduler: # Plateau, oneCycle, CosineAnnealingLR
+  type: 'Plateau'
+  oneCycle:
+    max_lr: 0.0001
+  Plateau:
+    mode: 'min'
+    patience: 2
+    factor: 0.5
+    min_lr: 0.000005
+  CosineAnnealingLR : 
+    T_max : 100  # Maximum number of iterations.
+    eta_min : 0.000001
+---
+data:
+  root_train : ""
+  root_test : ""
+---
+  log:
+    root: '/home/nas/user/kbh/TODO'
+---
+audio:
+  n_fft : 1024
+  n_hop : 256
+  sr : 16000
+
