@@ -6,8 +6,8 @@ import numpy as np
 
 from tensorboardX import SummaryWriter
 
-from model.Model import Model
-from Dataset import Dataset
+from models import CRNN
+from Datasets import DatasetSSL,Audio_Collate
 
 from utils.hparams import HParam
 from utils.writer import MyWriter
@@ -36,7 +36,6 @@ if __name__ == '__main__':
     torch.cuda.set_device(device)
 
     batch_size = hp.train.batch_size
-    block = hp.model.Model.block
     num_epochs = hp.train.epoch
     num_workers = hp.train.num_workers
 
@@ -51,24 +50,24 @@ if __name__ == '__main__':
 
     writer = MyWriter(hp, log_dir)
 
-    # TODO
-    train_dataset = Dataset(hp.data.root_train)
-    test_dataset= Dataset(hp.data.root_test)
+    train_dataset = DatasetSSL(hp,is_train=True)
+    test_dataset= DatasetSSL(hp,is_train=False)
 
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=batch_size,shuffle=True,num_workers=num_workers)
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=batch_size,shuffle=False,num_workers=num_workers)
+    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=batch_size,shuffle=True,num_workers=num_workers, collate_fn = lambda x : Audio_Collate(x))
+    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=batch_size,shuffle=False,num_workers=num_workers,collate_fn = lambda x : Audio_Collate(x))
 
-    # TODO
-    model = ModelModel(hp).to(device)
+    if hp.model.type == "m1" : 
+        model = CRNN(hp,4).to(device)
+    else :
+        raise Exception("ERROR::Unknown model type : {}".format(hp.model.type))
     # or model = get_model(hp).to(device)
 
     if not args.chkpt == None : 
         print('NOTE::Loading pre-trained model : '+ args.chkpt)
         model.load_state_dict(torch.load(args.chkpt, map_location=device))
 
-    # TODO
-    if hp.loss.type == "MSELoss":
-        criterion = torch.nn.MSELoss()
+    if hp.loss.type == "CrossEntropyLoss":
+        criterion = torch.nn.CrossEntropyLoss()
     else :
         raise Exception("ERROR::Unsupported criterion : {}".format(hp.loss.type))
 
@@ -97,20 +96,20 @@ if __name__ == '__main__':
         ### TRAIN ####
         model.train()
         train_loss=0
-        for i, (batch_data) in enumerate(train_loader):
+        for i, (data,label) in enumerate(train_loader):
+            data = data.to(device)
+            label = label.to(device)
             step +=1
-            
-            # TODO
 
-            loss = run(batch_data,model,criterion)
+            loss = run(data,label,model,criterion)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
            
-            print('TRAIN::{} : Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'.format(version,epoch+1, num_epochs, i+1, len(train_loader), loss.item()))
 
             if step %  hp.train.summary_interval == 0:
+                print('TRAIN::{} : Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'.format(version,epoch+1, num_epochs, i+1, len(train_loader), loss.item()))
                 writer.log_value(loss,step,'train loss : '+hp.loss.type)
 
         train_loss = train_loss/len(train_loader)
@@ -120,14 +119,28 @@ if __name__ == '__main__':
         model.eval()
         with torch.no_grad():
             test_loss =0.
-            for j, (batch_data) in enumerate(test_loader):
-                loss = run(batch_data,model,criterion)
+
+            n_test = 0
+            n_correct = 0
+            for j, (data,label) in enumerate(test_loader):
+                data = data.to(device)
+                label = label.to(device)
+                output,loss = run(data,label,model,criterion,ret_output=True)
                 test_loss += loss.item()
 
-                print('TEST::{} :  Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'.format(version, epoch+1, num_epochs, j+1, len(test_loader), loss.item()))
+                n_test += data.shape[0]
+
+                _label  = label.nonzero(as_tuple=True)[1]
+                _output = output.max(axis=1)[1]
+                n_correct += torch.sum(_label==_output).detach().cpu().numpy()
+
+
                 test_loss +=loss.item()
 
             test_loss = test_loss/len(test_loader)
+            print('TEST::{} :  Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Acc : {:.4f}'.format(version, epoch+1, num_epochs, j+1, len(test_loader), test_loss,n_correct/n_test))
+
+
             scheduler.step(test_loss)
             
             writer.log_value(test_loss,step,'test lost : ' + hp.loss.type)

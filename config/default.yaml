@@ -1,10 +1,16 @@
 model:
-  m1:
-    param1 : 1
+  type : "m1"
+  m2022:
+    c_in : 4
+  m2022 : 
+    c_in : 4
+---
+feature : 
+  phat : True
 ---
 train:
   epoch: 50
-  batch_size: 12
+  batch_size: 16
   num_workers: 16
   optimizer: 'adam'
   adam: 0.0001
@@ -12,12 +18,12 @@ train:
     initial: 0.001
     final: 0.05
   frame_num: 128
-  summary_interval: 10
+  summary_interval: 50
   validation_interval: 100
   checkpoint_interval: 1000
 ---
 loss:
-  type: 'MSE'
+  type: 'CrossEntropyLoss'
 ---
 scheduler: # Plateau, oneCycle, CosineAnnealingLR
   type: 'Plateau'
@@ -33,14 +39,14 @@ scheduler: # Plateau, oneCycle, CosineAnnealingLR
     eta_min : 0.000001
 ---
 data:
-  root_train : ""
-  root_test : ""
+  train : "/home/data2/kbh/AIG2022/SSL/train"
+  test  : "/home/data2/kbh/AIG2022/SSL/test"
 ---
   log:
-    root: '/home/nas/user/kbh/TODO'
+    root: '/home/nas/user/kbh/PCM_A10_SSL'
 ---
 audio:
-  n_fft : 1024
-  n_hop : 256
+  n_fft : 512
+  n_hop : 128
   sr : 16000
 

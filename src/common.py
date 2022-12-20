@@ -6,12 +6,11 @@ def get_model(hp):
 
     return
 
-def run(data,model,criterion,ret_output=False): 
-    input = data['input'].to(device)
-    target = data['target'].to(device)
+def run(data,label,model,criterion,ret_output=False): 
+    input = data
     output = model(input)
 
-    loss = criterion(output,target).to(device)
+    loss = criterion(output,label)
 
     if ret_output :
         return output, loss
