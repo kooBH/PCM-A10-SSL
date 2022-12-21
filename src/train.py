@@ -158,9 +158,14 @@ if __name__ == '__main__':
             writer.log_value(test_loss,step,'test lost : ' + hp.loss.type)
             writer.log_value(acc,step,'acc')
 
-            if best_acc > acc:
-                print("SAVE::bestmodel.pt prev acc {}, new acc {}".format(best_acc,acc))
+
+            if best_loss > test_loss:
                 torch.save(model.state_dict(), str(modelsave_path)+'/bestmodel.pt')
+                best_loss = test_loss
+
+            if best_acc < acc:
+                print("SAVE::model_{}.pt prev acc {}, new acc {}".format(acc,best_acc,acc))
+                torch.save(model.state_dict(), str(modelsave_path)+'/bestmodel_{}.pt'.format(acc))
                 best_acc = acc
 
 
