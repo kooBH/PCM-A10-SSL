@@ -40,6 +40,7 @@ if __name__ == '__main__':
     num_workers = hp.train.num_workers
 
     best_loss = 1e7
+    best_acc = 0
 
     ## load
     modelsave_path = hp.log.root +'/'+'chkpt' + '/' + version
@@ -56,8 +57,23 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=batch_size,shuffle=True,num_workers=num_workers, collate_fn = lambda x : Audio_Collate(x))
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=batch_size,shuffle=False,num_workers=num_workers,collate_fn = lambda x : Audio_Collate(x))
 
+
+    ## Criterion
+    if hp.loss.type == "CrossEntropyLoss":
+        criterion = torch.nn.CrossEntropyLoss()
+        last_activation = "Softmax"
+    elif hp.loss.type == "BCELoss":
+        criterion = torch.nn.BCELoss()
+        last_activation = "Sigmoid"
+    else :
+        raise Exception("ERROR::Unsupported criterion : {}".format(hp.loss.type))
+
+    ## Model
     if hp.model.type == "m1" : 
-        model = CRNN(hp,4).to(device)
+        model = CRNN(hp,4,
+        pool_type = hp.model.m1.pool_type,
+        last_activation = last_activation
+        ).to(device)
     else :
         raise Exception("ERROR::Unknown model type : {}".format(hp.model.type))
     # or model = get_model(hp).to(device)
@@ -65,11 +81,6 @@ if __name__ == '__main__':
     if not args.chkpt == None : 
         print('NOTE::Loading pre-trained model : '+ args.chkpt)
         model.load_state_dict(torch.load(args.chkpt, map_location=device))
-
-    if hp.loss.type == "CrossEntropyLoss":
-        criterion = torch.nn.CrossEntropyLoss()
-    else :
-        raise Exception("ERROR::Unsupported criterion : {}".format(hp.loss.type))
 
     optimizer = torch.optim.Adam(model.parameters(), lr=hp.train.adam)
 
@@ -138,14 +149,18 @@ if __name__ == '__main__':
                 test_loss +=loss.item()
 
             test_loss = test_loss/len(test_loader)
-            print('TEST::{} :  Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Acc : {:.4f}'.format(version, epoch+1, num_epochs, j+1, len(test_loader), test_loss,n_correct/n_test))
+            acc = n_correct/n_test
+            print('TEST::{} :  Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Acc : {:.4f}'.format(version, epoch+1, num_epochs, j+1, len(test_loader), test_loss,acc))
 
 
             scheduler.step(test_loss)
             
             writer.log_value(test_loss,step,'test lost : ' + hp.loss.type)
+            writer.log_value(acc,step,'acc')
 
-            if best_loss > test_loss:
+            if best_acc > acc:
+                print("SAVE::bestmodel.pt prev acc {}, new acc {}".format(best_acc,acc))
                 torch.save(model.state_dict(), str(modelsave_path)+'/bestmodel.pt')
-                best_loss = test_loss
+                best_acc = acc
+
 

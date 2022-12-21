@@ -1,9 +1,8 @@
 model:
   type : "m1"
-  m2022:
+  m1:
     c_in : 4
-  m2022 : 
-    c_in : 4
+    pool_type : "avg" # avg,max
 ---
 feature : 
   phat : True
@@ -23,7 +22,7 @@ train:
   checkpoint_interval: 1000
 ---
 loss:
-  type: 'CrossEntropyLoss'
+  type: 'BCELoss' # CrossEntropyLoss, BCELoss
 ---
 scheduler: # Plateau, oneCycle, CosineAnnealingLR
   type: 'Plateau'

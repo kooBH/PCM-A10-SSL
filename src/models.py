@@ -4,7 +4,7 @@ from modules import *
 from asteroid_filterbanks import ParamSincFB
 
 class CRNN(nn.Module):
-    def __init__(self, hp, c_in, class_num=10, pool_type='avg', pool_size=(2,2), pretrained_path=None):
+    def __init__(self, hp, c_in, class_num=10, pool_type='avg', pool_size=(2,2), pretrained_path=None,last_activation="Sigmoid"):
         super().__init__()
 
         self.class_num = class_num
@@ -28,6 +28,13 @@ class CRNN(nn.Module):
         self.azimuth_fc1 = nn.Linear(128, class_num, bias=True)
 
         self.init_weights()
+
+        if last_activation == "Sigmoid" :
+            self.last_activation = nn.Sigmoid()
+        elif last_activation == "Softmax" : 
+            self.last_activation = nn.Softmax()
+        else : 
+            self.last_activation = nn.Sigmoid()
 
     def init_weights(self):
 
@@ -71,7 +78,7 @@ class CRNN(nn.Module):
 
         # Interpolate
         azimuth_output = interpolate(azimuth_output, self.interp_ratio)
-        azimuth_output = F.sigmoid(azimuth_output)
+        azimuth_output = self.last_activation(azimuth_output)
 
         pred = azimuth_output.mean(1)
         #prediction = scores.max(-1)[1]
