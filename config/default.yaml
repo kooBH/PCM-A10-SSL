@@ -1,14 +1,17 @@
 model:
-  type : "m1"
+  type : "m1" # m1,m2, CRNNv2
   m1:
-    c_in : 4
+    pool_type : "avg" # avg,max
+  CRNNv2 :
     pool_type : "avg" # avg,max
 ---
 feature : 
+  cc : True
   phat : True
+
 ---
 train:
-  epoch: 50
+  epoch: 30
   batch_size: 16
   num_workers: 16
   optimizer: 'adam'

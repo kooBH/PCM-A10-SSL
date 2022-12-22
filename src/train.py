@@ -54,6 +54,9 @@ if __name__ == '__main__':
     train_dataset = DatasetSSL(hp,is_train=True)
     test_dataset= DatasetSSL(hp,is_train=False)
 
+    print("train_dataset : {}".format(len(train_dataset)))
+    print("test_dataset: {}".format(len(test_dataset)))
+
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=batch_size,shuffle=True,num_workers=num_workers, collate_fn = lambda x : Audio_Collate(x))
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=batch_size,shuffle=False,num_workers=num_workers,collate_fn = lambda x : Audio_Collate(x))
 
@@ -68,22 +71,32 @@ if __name__ == '__main__':
     else :
         raise Exception("ERROR::Unsupported criterion : {}".format(hp.loss.type))
 
+    ## n_ch
+    c_in = 2
+    if hp.feature.cc : 
+        c_in +=2
+
     ## Model
     if hp.model.type == "m1" : 
-        model = CRNN(4,
+        model = CRNN(c_in,
         pool_type = hp.model.m1.pool_type,
         last_activation = last_activation
         ).to(device)
     elif hp.model.type =="m2":
-        model = TCRN(4,
+        model = TCRN(c_in,
         last_activation = last_activation
         ).to(device)
     elif hp.model.type =="TCRNv2":
-        model = TCRNv2(4,
+        model = TCRNv2(c_in,
         last_activation = last_activation
         ).to(device)
     elif hp.model.type == "CRNNv2":
-        model = CRNNv2(4,
+        model = CRNNv2(c_in,
+        pool_type = hp.model.CRNNv2.pool_type,
+        last_activation = last_activation
+        ).to(device)
+    elif hp.model.type == "CRNNv3":
+        model = CRNNv2(c_in,
         pool_type = hp.model.CRNNv2.pool_type,
         last_activation = last_activation
         ).to(device)
@@ -168,7 +181,7 @@ if __name__ == '__main__':
 
             scheduler.step(test_loss)
             
-            writer.log_value(test_loss,step,'test lost : ' + hp.loss.type)
+            writer.log_value(test_loss,step,'test loss : ' + hp.loss.type)
             writer.log_value(acc,step,'acc')
 
 

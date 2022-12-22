@@ -12,7 +12,7 @@ def Audio_Collate(batch):
     wrong_indices = []
     
     B = len(data)
-    inputs = torch.zeros(B, 4, max_len, 257)
+    inputs = torch.zeros(B, data[0].shape[0], max_len, 257)
     labels = torch.zeros(B, 10)
     j = 0
     '''zero pad'''    
@@ -29,6 +29,7 @@ class DatasetSSL(torch.utils.data.Dataset):
         self.n_fft = hp.audio.n_fft
         self.n_hop = hp.audio.n_hop
         self.sr = hp.audio.sr
+        self.cc = hp.feature.cc
         self.phat = hp.feature.phat
 
         self.GT = {
@@ -137,16 +138,21 @@ class DatasetSSL(torch.utils.data.Dataset):
         def transform(audio):
             channel_num = audio.shape[0]
             feature_logdb = []
-            feature_gcc_phat = []
+
             for n in range(channel_num):
                 feature_logdb.append(logdb(audio[n]))
-                for m in range(n+1, channel_num):
-                    feature_gcc_phat.append(
-                        gcc_phat(sig=audio[m], refsig=audio[n]))
-            
             feature_logdb = np.concatenate(feature_logdb, axis=0)
-            feature_gcc_phat = np.concatenate(feature_gcc_phat, axis=0)
-            feature = np.concatenate([feature_logdb, feature_gcc_phat])
+
+            if self.cc : 
+                feature_gcc_phat = []
+                for n in range(channel_num):
+                    for m in range(n+1, channel_num):
+                        feature_gcc_phat.append(
+                            gcc_phat(sig=audio[m], refsig=audio[n]))
+                feature_gcc_phat = np.concatenate(feature_gcc_phat, axis=0)
+                feature = np.concatenate([feature_logdb, feature_gcc_phat])
+            else :
+                feature = feature_logdb
 
             return feature
         
