@@ -6,7 +6,7 @@ import numpy as np
 
 from tensorboardX import SummaryWriter
 
-from models import CRNN
+from models import *
 from Datasets import DatasetSSL,Audio_Collate
 
 from utils.hparams import HParam
@@ -70,8 +70,21 @@ if __name__ == '__main__':
 
     ## Model
     if hp.model.type == "m1" : 
-        model = CRNN(hp,4,
+        model = CRNN(4,
         pool_type = hp.model.m1.pool_type,
+        last_activation = last_activation
+        ).to(device)
+    elif hp.model.type =="m2":
+        model = TCRN(4,
+        last_activation = last_activation
+        ).to(device)
+    elif hp.model.type =="TCRNv2":
+        model = TCRNv2(4,
+        last_activation = last_activation
+        ).to(device)
+    elif hp.model.type == "CRNNv2":
+        model = CRNNv2(4,
+        pool_type = hp.model.CRNNv2.pool_type,
         last_activation = last_activation
         ).to(device)
     else :
@@ -163,7 +176,7 @@ if __name__ == '__main__':
                 torch.save(model.state_dict(), str(modelsave_path)+'/bestmodel.pt')
                 best_loss = test_loss
 
-            if best_acc < acc:
+            if best_acc < acc and acc > 0.96:
                 print("SAVE::model_{}.pt prev acc {}, new acc {}".format(acc,best_acc,acc))
                 torch.save(model.state_dict(), str(modelsave_path)+'/bestmodel_{}.pt'.format(acc))
                 best_acc = acc

@@ -178,7 +178,7 @@ class ChannelwiseLayerNorm(nn.Module):
         """
         mean = torch.mean(y, dim=1, keepdim=True)  # [M, 1, K]
         var = torch.var(y, dim=1, keepdim=True, unbiased=False)  # [M, 1, K]
-        cLN_y = self.gamma * (y - mean) / torch.pow(var + EPS, 0.5) + self.beta
+        cLN_y = self.gamma * (y - mean) / torch.pow(var + 1e-13, 0.5) + self.beta
         return cLN_y
 
 
@@ -204,7 +204,7 @@ class GlobalLayerNorm(nn.Module):
         # TODO: in torch 1.0, torch.mean() support dim list
         mean = y.mean(dim=1, keepdim=True).mean(dim=2, keepdim=True) #[M, 1, 1]
         var = (torch.pow(y-mean, 2)).mean(dim=1, keepdim=True).mean(dim=2, keepdim=True)
-        gLN_y = self.gamma * (y - mean) / torch.pow(var + EPS, 0.5) + self.beta
+        gLN_y = self.gamma * (y - mean) / torch.pow(var + 1e-13, 0.5) + self.beta
         return gLN_y
 
 
@@ -223,7 +223,6 @@ def interpolate(x, ratio):
     upsampled = upsampled.reshape(batch_size, time_steps * ratio, classes_num)
     
     return upsampled
-
     
 def init_layer(layer, nonlinearity='leaky_relu'):
     '''
@@ -238,7 +237,6 @@ def init_layer(layer, nonlinearity='leaky_relu'):
     elif classname.find('BatchNorm') != -1:
         nn.init.normal_(layer.weight, 1.0, 0.02)
         nn.init.constant_(layer.bias, 0.0)
-
 
 def init_mask(layer, nonlinearity='leaky_relu'):
     '''
