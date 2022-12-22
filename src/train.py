@@ -96,13 +96,13 @@ if __name__ == '__main__':
         last_activation = last_activation
         ).to(device)
     elif hp.model.type == "CRNNv3":
-        model = CRNNv2(c_in,
+        model = CRNNv3(c_in,
         pool_type = hp.model.CRNNv2.pool_type,
         last_activation = last_activation
         ).to(device)
     else :
         raise Exception("ERROR::Unknown model type : {}".format(hp.model.type))
-    # or model = get_model(hp).to(device)
+    print("Model::{}".format(model.__class__.__name__))
 
     if not args.chkpt == None : 
         print('NOTE::Loading pre-trained model : '+ args.chkpt)

@@ -4,6 +4,11 @@
 
 Sound Source Localization for [PCM-A10](https://www.sony.co.kr/electronics/voice-recorders/pcm-a10) Microphone
 
+# Usage
+
+```
+python run.py -i <directory of input files > --device <cuda:0 or cuda:1 or cpu>
+```
 
 
 # Acknowledgement

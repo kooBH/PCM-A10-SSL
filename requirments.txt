@@ -7,3 +7,4 @@ pandas
 tensorboard
 tensorboardx
 matplotlib
+asteroid_filterbanks
