@@ -6,6 +6,7 @@ model:
     pool_type : "avg" # avg,max
 ---
 feature : 
+  dB : True
   cc : True
   phat : True
 

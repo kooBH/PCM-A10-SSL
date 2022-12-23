@@ -72,7 +72,9 @@ if __name__ == '__main__':
         raise Exception("ERROR::Unsupported criterion : {}".format(hp.loss.type))
 
     ## n_ch
-    c_in = 2
+    c_in = 0
+    if hp.feature.dB : 
+        c_in += 2
     if hp.feature.cc : 
         c_in +=2
 

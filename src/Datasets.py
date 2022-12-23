@@ -29,6 +29,7 @@ class DatasetSSL(torch.utils.data.Dataset):
         self.n_fft = hp.audio.n_fft
         self.n_hop = hp.audio.n_hop
         self.sr = hp.audio.sr
+        self.dB = hp.feature.dB
         self.cc = hp.feature.cc
         self.phat = hp.feature.phat
 
@@ -137,11 +138,19 @@ class DatasetSSL(torch.utils.data.Dataset):
 
         def transform(audio):
             channel_num = audio.shape[0]
-            feature_logdb = []
+            feature = None
 
-            for n in range(channel_num):
-                feature_logdb.append(logdb(audio[n]))
-            feature_logdb = np.concatenate(feature_logdb, axis=0)
+            if self.dB : 
+                feature_logdb = []
+                for n in range(channel_num):
+                    feature_logdb.append(logdb(audio[n]))
+                feature_logdb = np.concatenate(feature_logdb, axis=0)
+
+                if feature is None : 
+                    feature = feature_logdb
+                else : 
+                    feature = np.concatenate([feature, feature_logdb])
+
 
             if self.cc : 
                 feature_gcc_phat = []
@@ -150,9 +159,10 @@ class DatasetSSL(torch.utils.data.Dataset):
                         feature_gcc_phat.append(
                             gcc_phat(sig=audio[m], refsig=audio[n]))
                 feature_gcc_phat = np.concatenate(feature_gcc_phat, axis=0)
-                feature = np.concatenate([feature_logdb, feature_gcc_phat])
-            else :
-                feature = feature_logdb
+                if feature is None : 
+                    feature = feature_gcc_phat
+                else : 
+                    feature = np.concatenate([feature, feature_gcc_phat])
 
             return feature
         
