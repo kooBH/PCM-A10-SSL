@@ -1,0 +1,11 @@
+model:
+  type : "m2" # m1,m2
+---
+scheduler: # Plateau, oneCycle, CosineAnnealingLR
+  type: "CosineAnnealingLR"
+  CosineAnnealingLR : 
+    T_max : 20  # Maximum number of iterations.
+    eta_min : 0.000001
+---
+train:
+  batch_size: 64

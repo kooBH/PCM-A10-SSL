@@ -1,0 +1,2 @@
+model:
+  type : "CRNNv2" # m1,m2, CRNNv2

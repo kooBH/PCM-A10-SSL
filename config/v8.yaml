@@ -1,0 +1,8 @@
+model:
+  type : "TCRNv2" # m1,m2
+---
+scheduler: # Plateau, oneCycle, CosineAnnealingLR
+  type: "CosineAnnealingLR"
+  CosineAnnealingLR : 
+    T_max : 20  # Maximum number of iterations.
+    eta_min : 0.000001

@@ -1,0 +1,10 @@
+model:
+  type : "CRNNv2" # m1,m2, CRNNv2
+---
+feature : 
+  phat : False
+---
+scheduler: # Plateau, oneCycle, CosineAnnealingLR
+  type: "CosineAnnealingLR" 
+  CosineAnnealingLR : 
+    T_max : 30  # Maximum number of iterations.
