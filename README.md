@@ -2,7 +2,7 @@
 ![image](https://user-images.githubusercontent.com/39723411/208828983-9c9c6283-dbed-4b4a-9334-c5d6b851a00b.png)
 
 
- For autonomous rescue drones, the direction of audio arrival estimation is useful in disaster situations. In such situations, audio information can be acquired regardless of visual obstacles. And to be run on mobile drones, a deep learning based model must be light-weighted. This code provides a model which is trained to detect the direction of a target source. This code is written in Python, based on Pytorch.
+ For autonomous rescue drones, the direction of audio arrival estimation is useful in disaster situations. In such situations, audio information can be acquired regardless of visual obstacles. And to be run on mobile drones, a deep learning based model must be light-weighted. This code provides a model which is trained to detect the direction of a target source. This code is written in Python, based on Pytorch.   
 
 ---
 
