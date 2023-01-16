@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEVICE=cuda:0
+DEVICE=cuda:1
 
 list="$(ps -aux)"
 
