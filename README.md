@@ -6,7 +6,8 @@
 
 ---
 
-Sound Source Localization for [PCM-A10](https://www.sony.co.kr/electronics/voice-recorders/pcm-a10) Microphone.
+Sound Source Localization for [PCM-A10](https://www.sony.co.kr/electronics/voice-recorders/pcm-a10) Microphone.    
+The PCM-A10 has two directional microphones.
 
 # Usage
 
